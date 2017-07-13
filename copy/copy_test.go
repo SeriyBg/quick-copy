@@ -1,11 +1,11 @@
 package copy
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"os"
-	"io/ioutil"
 	"bytes"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"os"
+	"testing"
 )
 
 const dstDirectory = "../testdata/destination/"
@@ -63,12 +63,13 @@ func Test_CopyFilesInDirectory(t *testing.T) {
 
 	objects, err := directory.Readdir(-1)
 	for _, obj := range objects {
-		assertFileContentsAreEqual(srcDir + obj.Name(), directoryName + obj.Name(), t)
+		assertFileContentsAreEqual(srcDir+obj.Name(), directoryName+obj.Name(), t)
 	}
 }
 
 func assertFileContentsAreEqual(srcFilename string, fileName string, t *testing.T) {
 	srcContent, err := ioutil.ReadFile(srcFilename)
+	assert.NoError(t, err)
 	dstContent, err := ioutil.ReadFile(dstDirectory + fileName)
 	assert.NoError(t, err)
 	assert.True(t, bytes.Equal(srcContent, dstContent))
@@ -81,4 +82,3 @@ func setUp() {
 func cleanUp() {
 	os.RemoveAll(dstDirectory)
 }
-

@@ -1,8 +1,9 @@
 package copy
 
 import (
-	"os"
 	"io"
+	"os"
+	"strings"
 )
 
 func file(src string, dstDirectory string) (err error) {
@@ -13,7 +14,11 @@ func file(src string, dstDirectory string) (err error) {
 	defer source.Close()
 
 	stat, err := source.Stat()
-	dstDirectory = dstDirectory + stat.Name()
+	if strings.HasSuffix(dstDirectory, "/") {
+		dstDirectory = dstDirectory + stat.Name()
+	} else {
+		dstDirectory = dstDirectory + "/" + stat.Name()
+	}
 
 	if err != nil {
 		return
@@ -41,6 +46,20 @@ func directory(src string, dstDirectory string) (err error) {
 	if err != nil {
 		return
 	}
-	os.MkdirAll(dstDirectory+ stat.Name(), stat.Mode())
+	copiedDirectory := dstDirectory + stat.Name()
+	os.MkdirAll(copiedDirectory, stat.Mode())
+
+	directory, err := os.Open(src)
+
+	objects, err := directory.Readdir(-1)
+	if err != nil {
+		return
+	}
+	for _, obj := range objects {
+		err = file(src + obj.Name(), copiedDirectory)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
