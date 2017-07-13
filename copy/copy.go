@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const pathSeparator = string(os.PathSeparator)
+
 func file(src string, dstDirectory string) (err error) {
 	source, err := os.Open(src)
 	if err != nil {
@@ -14,11 +16,7 @@ func file(src string, dstDirectory string) (err error) {
 	defer source.Close()
 
 	stat, err := source.Stat()
-	if strings.HasSuffix(dstDirectory, "/") {
-		dstDirectory = dstDirectory + stat.Name()
-	} else {
-		dstDirectory = dstDirectory + "/" + stat.Name()
-	}
+	dstDirectory = formDirName(dstDirectory, stat)
 
 	if err != nil {
 		return
@@ -46,20 +44,32 @@ func directory(src string, dstDirectory string) (err error) {
 	if err != nil {
 		return
 	}
-	copiedDirectory := dstDirectory + stat.Name()
-	os.MkdirAll(copiedDirectory, stat.Mode())
+	dstDirectory = formDirName(dstDirectory, stat)
+	err = os.MkdirAll(dstDirectory, stat.Mode())
+	dir, err := os.Open(src)
 
-	directory, err := os.Open(src)
-
-	objects, err := directory.Readdir(-1)
+	objects, err := dir.Readdir(-1)
 	if err != nil {
 		return
 	}
 	for _, obj := range objects {
-		err = file(src + obj.Name(), copiedDirectory)
+		if obj.IsDir() {
+			err = directory(src+pathSeparator+obj.Name()+pathSeparator, dstDirectory)
+		} else {
+			err = file(src+obj.Name(), dstDirectory)
+		}
 		if err != nil {
 			return
 		}
 	}
 	return
+}
+
+func formDirName(dstDirectory string, stat os.FileInfo) string {
+	if strings.HasSuffix(dstDirectory, pathSeparator) {
+		dstDirectory = dstDirectory + stat.Name()
+	} else {
+		dstDirectory = dstDirectory + pathSeparator + stat.Name()
+	}
+	return dstDirectory
 }

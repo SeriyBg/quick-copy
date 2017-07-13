@@ -67,6 +67,28 @@ func Test_CopyFilesInDirectory(t *testing.T) {
 	}
 }
 
+func Test_CopyDirectoryRecursive(t *testing.T) {
+	const directoryName = "complex_dir/"
+	const nestedDirectoryName = "nested_dir/"
+	const srcDir = srcDirectory + directoryName
+
+	err := directory(srcDir, dstDirectory)
+	assert.NoError(t, err)
+
+	directory, err := os.Open(srcDir)
+	assert.NoError(t, err)
+
+	objects, err := directory.Readdir(-1)
+	for _, obj := range objects {
+		println(obj.Name())
+		if !obj.IsDir() {
+			assertFileContentsAreEqual(srcDir+obj.Name(), directoryName+obj.Name(), t)
+		}
+	}
+	assertFileContentsAreEqual(srcDir+nestedDirectoryName+"test1.txt",
+		directoryName+nestedDirectoryName+"test1.txt", t)
+}
+
 func assertFileContentsAreEqual(srcFilename string, fileName string, t *testing.T) {
 	srcContent, err := ioutil.ReadFile(srcFilename)
 	assert.NoError(t, err)
