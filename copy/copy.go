@@ -16,7 +16,7 @@ func file(src string, dstDirectory string) (err error) {
 	defer source.Close()
 
 	stat, err := source.Stat()
-	dstDirectory = formDirName(dstDirectory, stat)
+	dstDirectory = dstName(dstDirectory, stat)
 
 	if err != nil {
 		return
@@ -44,7 +44,7 @@ func directory(src string, dstDirectory string) (err error) {
 	if err != nil {
 		return
 	}
-	dstDirectory = formDirName(dstDirectory, stat)
+	dstDirectory = dstName(dstDirectory, stat)
 	err = os.MkdirAll(dstDirectory, stat.Mode())
 	dir, err := os.Open(src)
 
@@ -65,7 +65,7 @@ func directory(src string, dstDirectory string) (err error) {
 	return
 }
 
-func formDirName(dstDirectory string, stat os.FileInfo) string {
+func dstName(dstDirectory string, stat os.FileInfo) string {
 	if strings.HasSuffix(dstDirectory, pathSeparator) {
 		dstDirectory = dstDirectory + stat.Name()
 	} else {

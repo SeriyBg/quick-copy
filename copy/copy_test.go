@@ -80,7 +80,6 @@ func Test_CopyDirectoryRecursive(t *testing.T) {
 
 	objects, err := directory.Readdir(-1)
 	for _, obj := range objects {
-		println(obj.Name())
 		if !obj.IsDir() {
 			assertFileContentsAreEqual(srcDir+obj.Name(), directoryName+obj.Name(), t)
 		}
