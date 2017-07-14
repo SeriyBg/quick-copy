@@ -8,6 +8,18 @@ import (
 
 const pathSeparator = string(os.PathSeparator)
 
+type handler func(src string, dstDirectory string) (err error)
+
+func Copier(src string) (copy handler, err error)  {
+	source, err := os.Stat(src)
+	if source.IsDir() {
+		copy = directory
+	} else {
+		copy = file
+	}
+	return
+}
+
 func file(src string, dstDirectory string) (err error) {
 	source, err := os.Open(src)
 	if err != nil {
